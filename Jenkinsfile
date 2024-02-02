@@ -7,18 +7,18 @@ pipeline {
                 sh 'mvn clean install package'
             }
         }
-        stage('copy artifacts') {
+        stage ('Copy Artifacts') {
             steps {
                 sh 'pwd'
                 sh 'cp -r target/*.jar docker'
             }
         }
-        stage ('unit tests') {
+        stage('Unit Tests') {
             steps {
                 sh 'mvn test'
             }
         }
-        stage('build docker image'){
+        stage('Build Docker Image'){
             steps{
                 script {
                     def customImage = docker.build("kamleshamrute/petclinic:${env.BUILD_NUMBER}", "./docker")
@@ -27,19 +27,19 @@ pipeline {
                 }
             }
         }
-
     }
-    stage ('Build on kubernetes'){
+    stage('Build on kubernetes'){
         steps {
-            withKubeConfig([credentialsId: 'kubeconfig']){
-                 sh 'pwd'
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+                sh 'pwd'
                 sh 'cp -R helm/* .'
                 sh 'ls -ltrh'
                 sh 'pwd'
                 sh '/usr/local/bin/helm upgrade --install petclinic-app petclinic --set image.repository=kamleshamrute/petclinic --set image.tag=${BUILD_NUMBER}'
-            }
         }
     }
 }
+
 }
- 
+
+}
