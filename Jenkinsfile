@@ -19,14 +19,16 @@ pipeline {
             }
         }
         stage('build docker image'){
-            steps {
+            steps{
                 script {
-                    def customImage = docker.build("kamleshamrute/petclinic:${env.BUILD_NUMBER}", "./docker")
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub')
-                    customImage.push() 
+                    def customImage = docker.build("ashaik65/petclinic:${env.BUILD_NUMBER}", "./docker")
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                    customImage.push()    
                 }
             }
         }
+
     }
+}
 }
  
