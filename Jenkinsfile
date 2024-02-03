@@ -18,28 +18,26 @@ pipeline {
                 sh 'mvn test'
             }
         }
-        stage('Build Docker Image'){
-            steps{
+        stage('Build Docker Image') {
+            steps {
                 script {
-                    def customImage = docker.build("kamleshamrute/petclinic:${env.BUILD_NUMBER}", "./docker")
+                    def customImage = docker.build("ashaik65/petclinic:${env.BUILD_NUMBER}", "./docker")
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                    customImage.push()    
+                        customImage.push()
+                    }
+                }
+            }
+        }
+        stage('Build on Kubernetes') {
+            steps {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    sh 'pwd'
+                    sh 'cp -R helm/* .'
+                    sh 'ls -ltrh'
+                    sh 'pwd'
+                    sh '/usr/local/bin/helm upgrade --install petclinic-app petclinic --set image.repository=ashaik65/petclinic --set image.tag=${BUILD_NUMBER}'
                 }
             }
         }
     }
-    stage('Build on kubernetes'){
-        steps {
-            withKubeConfig([credentialsId: 'kubeconfig']) {
-                sh 'pwd'
-                sh 'cp -R helm/* .'
-                sh 'ls -ltrh'
-                sh 'pwd'
-                sh '/usr/local/bin/helm upgrade --install petclinic-app petclinic --set image.repository=kamleshamrute/petclinic --set image.tag=${BUILD_NUMBER}'
-        }
-    }
-}
-
-}
-
 }
